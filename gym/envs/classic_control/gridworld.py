@@ -49,7 +49,7 @@ class GridWorld(gym.Env):
     def __init__(self):
         # move N,S,E,W
         self.action_space = spaces.Discrete(4)
-        # row, column
+        # row, column (y, x)
         self.observation_space = spaces.MultiDiscrete([[0, 4], [0, 4]])
         self._seed()
         self.state = np.array([0, 0])
@@ -62,35 +62,39 @@ class GridWorld(gym.Env):
     def _step(self, action):
         assert self.action_space.contains(action), "Invalid action"
 
+        y = self.state[0]
+        x = self.state[1]
         # compute new coordinates and rewards
-        if self.state[0] == 1 and self.state[1] == 0:
-            self.state[0] = 1
-            self.state[1] = 4
+        if y == 0 and x == 1:
+            x = 1
+            y = 4
             reward = 10
-        elif self.state[0] == 3 and self.state[1] == 0:
-            self.state[0] = 3
-            self.state[1] = 2
+        elif y == 0 and x == 3:
+            x = 3
+            y = 2
             reward = 5
-        elif (action == GridWorld.N and self.state[1] == 0) or \
-                (action == GridWorld.S and self.state[1] == 4) or \
-                (action == GridWorld.E and self.state[0] == 4) or \
-                (action == GridWorld.W and self.state[0] == 0):
+        elif (action == GridWorld.N and y == 0) or \
+                (action == GridWorld.S and y == 4) or \
+                (action == GridWorld.E and x == 4) or \
+                (action == GridWorld.W and x == 0):
             reward = -1
         elif action == GridWorld.N:
-            self.state[1] -= 1
+            y -= 1
             reward = 0
         elif action == GridWorld.S:
-            self.state[1] += 1
+            y += 1
             reward = 0
         elif action == GridWorld.E:
-            self.state[0] += 1
+            x += 1
             reward = 0
         elif action == GridWorld.W:
-            self.state[0] -= 1
+            x -= 1
             reward = 0
         else:
             reward = 0
 
+        self.state[0] = y
+        self.state[1] = x
         return self.state, reward, False, {}
 
     def _reset(self):
@@ -125,7 +129,7 @@ class GridWorld(gym.Env):
             self.robot_transform = rendering.Transform()
             self.robot.add_attr(self.robot_transform)
 
-        self.robot_transform.set_translation(self.state[0] * px_per_cell + px_per_cell / 2,
-                                             size_px - self.state[1] * px_per_cell - px_per_cell / 2)
+        self.robot_transform.set_translation(self.state[1] * px_per_cell + px_per_cell / 2,
+                                             size_px - self.state[0] * px_per_cell - px_per_cell / 2)
 
         return self.viewer.render(return_rgb_array=(mode == 'rgb_array'))
