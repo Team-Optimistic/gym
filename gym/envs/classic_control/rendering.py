@@ -83,10 +83,16 @@ class Viewer(object):
         self.window.switch_to()
         self.window.dispatch_events()
         self.transform.enable()
-        for geom in self.geoms:
-            geom.render()
         for geom in self.onetime_geoms:
             geom.render()
+            #print('ignore other')
+        for geom in self.geoms:
+            if hasattr(geom,'render'):    
+                geom.render()
+                #print('ignore')
+            else:
+                geom.draw()
+                #print(geom)
         self.transform.disable()
         arr = None
         if return_rgb_array:
